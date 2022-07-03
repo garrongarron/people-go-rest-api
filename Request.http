@@ -1,0 +1,24 @@
+POST http://localhost:3333/people/3 HTTP/1.1
+content-type: application/json
+
+{
+    "id":"3",
+    "firstname":"John",
+    "lastname":"Doe",
+    "addres":{
+        "city":"City X",
+        "state":"State X"
+    }
+}
+###
+GET http://localhost:3333/people HTTP/1.1
+
+###
+GET http://localhost:3333/people/1 HTTP/1.1
+
+###
+GET http://localhost:3333/people/fede HTTP/1.1
+
+
+###
+DELETE http://localhost:3333/people/1 HTTP/1.1
