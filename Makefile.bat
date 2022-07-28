@@ -1,0 +1,1 @@
+swagger_windows_amd64.exe generate spec -o ./swagger.yaml --scan-models

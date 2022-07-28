@@ -1,9 +1,24 @@
+// Package classification People API.
+//
+// Documentation for Person API
+//
+//     Schemes: http
+//     BasePath: /
+//     Version: 0.0.1
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+// 	swagger:meta
 package main
 
 import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -21,13 +36,40 @@ type Person struct {
 
 var people []Person
 
-func GetInputEndpoint(w http.ResponseWriter, r *http.Request) {
+// A list of persons returns in the responses
+// swagger:response personResponse
+type peopleResponse struct {
+	// All people in the listsystem
+	// in: body
+	Body []Person
+}
+
+// No content
+// swagger:response noContentResponse
+type noContentResponseWrapper struct {
+}
+
+// swagger:parameters blablabla DeletePerson
+type peopleIDParameterWraper struct {
+	// The id of the person to delete
+	// in: path
+	// required: true
+	ID int `json:"id"`
+}
+
+func GetInput(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(people)
 }
 
-func GetPersonEndpoint(w http.ResponseWriter, r *http.Request) {
+// swagger:route GET /people Person GetPerson
+// Returns a list of person
+// responses:
+//    200: personResponse
+
+// GetPerson returns the person
+func GetPerson(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	for _, item := range people {
 		if item.ID == params["id"] {
@@ -37,7 +79,8 @@ func GetPersonEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(&Person{})
 }
-func CreatePersonEndpoint(w http.ResponseWriter, r *http.Request) {
+
+func CreatePerson(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	var person Person
 	_ = json.NewDecoder(r.Body).Decode(&person)
@@ -46,7 +89,14 @@ func CreatePersonEndpoint(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(people)
 }
 
-func DeletePersonEndpoint(w http.ResponseWriter, r *http.Request) {
+// swagger:route DELETE /people/{id} Person DeletePerson
+// Delete person from the database
+//
+// responses:
+//	201: noContentResponse
+
+// DeletePerson delete a person from the database
+func DeletePerson(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	for index, item := range people {
 		if item.ID == params["id"] {
@@ -64,10 +114,16 @@ func main() {
 	people = append(people, Person{ID: "2", FirstName: "Petter", LastName: "Tomson"})
 
 	//endpoints
-	router.HandleFunc("/people", GetInputEndpoint).Methods("GET")
-	router.HandleFunc("/people/{id}", CreatePersonEndpoint).Methods("POST")
-	router.HandleFunc("/people/{id}", GetPersonEndpoint).Methods("GET")
-	router.HandleFunc("/people/{id}", DeletePersonEndpoint).Methods("DELETE")
+	router.HandleFunc("/people", GetInput).Methods("GET")
+	router.HandleFunc("/people/{id}", CreatePerson).Methods("POST")
+	router.HandleFunc("/people/{id}", GetPerson).Methods("GET")
+	router.HandleFunc("/people/{id}", DeletePerson).Methods("DELETE")
+
+	options := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
+	sh := middleware.Redoc(options, nil)
+
+	router.Handle("/docs", sh)
+	router.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	http.ListenAndServe(":3333", router)
 

@@ -1,0 +1,74 @@
+basePath: /
+consumes:
+- application/json
+definitions:
+  Address:
+    properties:
+      city:
+        type: string
+        x-go-name: City
+      state:
+        type: string
+        x-go-name: State
+    type: object
+    x-go-package: person/swagger
+  Person:
+    properties:
+      addres:
+        $ref: '#/definitions/Address'
+      firstname:
+        type: string
+        x-go-name: FirstName
+      id:
+        type: string
+        x-go-name: ID
+      lastname:
+        type: string
+        x-go-name: LastName
+    type: object
+    x-go-package: person/swagger
+info:
+  description: Documentation for Person API
+  title: People API.
+  version: 0.0.1
+paths:
+  /people:
+    get:
+      description: Returns a list of person
+      operationId: GetPerson
+      responses:
+        "200":
+          $ref: '#/responses/personResponse'
+      tags:
+      - Person
+  /people/{id}:
+    delete:
+      description: Delete person from the database
+      operationId: DeletePerson
+      parameters:
+      - description: The id of the person to delete
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+        x-go-name: ID
+      responses:
+        "201":
+          $ref: '#/responses/noContentResponse'
+      tags:
+      - Person
+produces:
+- application/json
+responses:
+  noContentResponse:
+    description: No content
+  personResponse:
+    description: A list of persons returns in the responses
+    schema:
+      items:
+        $ref: '#/definitions/Person'
+      type: array
+schemes:
+- http
+swagger: "2.0"
